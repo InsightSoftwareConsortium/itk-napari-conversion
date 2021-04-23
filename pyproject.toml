@@ -1,0 +1,20 @@
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "itk_napari_conversion"
+author = "Matt McCormick"
+author-email = "matt.mccormick@kitware.com"
+home-page = "https://github.com/InsightSoftwareConsortium/itk-napari-conversion"
+classifiers = [ "License :: OSI Approved :: Apache Software License",]
+
+requires = [
+    "itk-core >=5.2.0",
+    "napari",
+]
+
+[tool.flit.metadata.requires-extra]
+test = [
+    "pytest",
+]

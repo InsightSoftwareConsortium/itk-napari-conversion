@@ -84,10 +84,19 @@ def test_image_from_image_layer_metadata():
     assert image["units"] == "mm"
 
 def test_image_from_image_layer_scale():
-    data = np.random.randint(256, size=(10, 10, 3), dtype=np.uint8)
+    data = np.random.randint(256, size=(10, 10), dtype=np.uint8)
     metadata = {"wookies": 7, "units": "mm" }
     scale = [1.1, 2.2]
     image_layer = napari.layers.Image(data, scale=scale)
     image = itk_napari_conversion.image_from_image_layer(image_layer)
     assert np.array_equal(data, itk.array_view_from_image(image))
     assert np.allclose(scale, np.array(image["spacing"]))
+
+def test_image_from_image_layer_translate():
+    data = np.random.randint(256, size=(10, 10), dtype=np.uint8)
+    metadata = {"wookies": 7, "units": "mm" }
+    translate = [1.1, 2.2]
+    image_layer = napari.layers.Image(data, translate=translate)
+    image = itk_napari_conversion.image_from_image_layer(image_layer)
+    assert np.array_equal(data, itk.array_view_from_image(image))
+    assert np.allclose(translate, np.array(image["origin"]))

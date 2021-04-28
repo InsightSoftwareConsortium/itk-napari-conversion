@@ -47,6 +47,9 @@ def image_from_image_layer(image_layer):
             image[k] = v
 
     if image_layer.scale is not None:
-        image["spacing"] = image_layer.scale
+        image["spacing"] = image_layer.scale.astype(np.float64)
+
+    if image_layer.translate is not None:
+        image["origin"] = image_layer.translate.astype(np.float64)
 
     return image

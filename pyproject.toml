@@ -7,7 +7,19 @@ module = "itk_napari_conversion"
 author = "Matt McCormick"
 author-email = "matt.mccormick@kitware.com"
 home-page = "https://github.com/InsightSoftwareConsortium/itk-napari-conversion"
-classifiers = [ "License :: OSI Approved :: Apache Software License",]
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Software Development :: Libraries",
+]
 description-file="README.md"
 
 requires = [

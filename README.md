@@ -29,3 +29,23 @@ from itk_napari_conversion import image_from_image_layer
 
 image = image_from_image_layer(image_layer)
 ```
+
+Hacking
+-------
+
+Contributions are welcome!
+
+To test locally:
+
+```
+git clone https://github.com/InsightSoftwareConsortium/itk-napari-conversion.git
+cd itk-napari-conversation
+pip install flit pytest
+flit install --symlink
+pytest test.py
+```
+
+Follow the [itk contributing
+guidelines](https://github.com/InsightSoftwareConsortium/ITK/blob/master/CONTRIBUTING.md)
+and the [itk code of
+conduct](https://github.com/InsightSoftwareConsortium/ITK/blob/master/CODE_OF_CONDUCT.md).

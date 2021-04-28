@@ -43,3 +43,13 @@ def test_image_layer_from_image_translate():
     image_layer = itk_napari_conversion.image_layer_from_image(image)
     assert np.array_equal(data, image_layer.data)
     assert np.allclose(np.array(origin)[::-1], image_layer.translate)
+
+# https://github.com/InsightSoftwareConsortium/itk-napari-conversion/issues/7
+# def test_image_layer_from_image_rotate():
+    # data = np.random.randint(256, size=(10, 10), dtype=np.uint8)
+    # image = itk.image_view_from_array(data)
+    # rotate = np.rot90(np.eye(2))
+    # image.SetDirection(rotate)
+    # image_layer = itk_napari_conversion.image_layer_from_image(image)
+    # assert np.array_equal(data, image_layer.data)
+    # assert np.allclose(rotation, image_layer.rotate)

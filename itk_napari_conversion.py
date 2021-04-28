@@ -1,6 +1,6 @@
 """Convert between itk and napari data structures."""
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = ['image_layer_from_image',]
 

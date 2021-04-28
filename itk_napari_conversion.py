@@ -9,6 +9,12 @@ import itk
 import numpy as np
 
 def image_layer_from_image(image):
+    rgb = False
+    if isinstance(image, itk.Image):
+        PixelType = itk.template(image)[1][0]
+        if PixelType is itk.RGBPixel[itk.UC] or PixelType is itk.RGBAPixel[itk.UC]:
+            rgb = True
+
     data = itk.array_view_from_image(image)
-    image_layer = napari.layers.Image(data)
+    image_layer = napari.layers.Image(data, rgb=rgb)
     return image_layer

@@ -42,8 +42,11 @@ def image_from_image_layer(image_layer):
     else:
         image = itk.image_view_from_array(image_layer.data)
 
-    if image_layer.metadata:
+    if image_layer.metadata is not None:
         for k, v in image_layer.metadata.items():
             image[k] = v
+
+    if image_layer.scale is not None:
+        image["spacing"] = image_layer.scale
 
     return image

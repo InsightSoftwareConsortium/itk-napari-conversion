@@ -17,8 +17,9 @@ def image_layer_from_image(image):
 
     metadata = dict(image)
     scale = image['spacing']
+    translate = image['origin']
 
     data = itk.array_view_from_image(image)
     image_layer = napari.layers.Image(data, rgb=rgb, metadata=metadata,
-            scale=scale)
+            scale=scale, translate=translate)
     return image_layer

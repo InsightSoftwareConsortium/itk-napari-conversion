@@ -34,3 +34,12 @@ def test_image_layer_from_image_scale():
     image_layer = itk_napari_conversion.image_layer_from_image(image)
     assert np.array_equal(data, image_layer.data)
     assert np.allclose(np.array(spacing)[::-1], image_layer.scale)
+
+def test_image_layer_from_image_translate():
+    data = np.random.randint(256, size=(10, 10), dtype=np.uint8)
+    image = itk.image_view_from_array(data)
+    origin = [1.1, 2.2]
+    image.SetOrigin(origin)
+    image_layer = itk_napari_conversion.image_layer_from_image(image)
+    assert np.array_equal(data, image_layer.data)
+    assert np.allclose(np.array(origin)[::-1], image_layer.translate)

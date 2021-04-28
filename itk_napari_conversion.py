@@ -15,6 +15,8 @@ def image_layer_from_image(image):
         if PixelType is itk.RGBPixel[itk.UC] or PixelType is itk.RGBAPixel[itk.UC]:
             rgb = True
 
+    metadata = dict(image)
+
     data = itk.array_view_from_image(image)
-    image_layer = napari.layers.Image(data, rgb=rgb)
+    image_layer = napari.layers.Image(data, rgb=rgb, metadata=metadata)
     return image_layer

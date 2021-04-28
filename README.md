@@ -18,7 +18,7 @@ Usage
 Convert an `itk.Image` to an `napari.layers.Image`:
 
 ```
-from itk_napari_conversion import image_from_layer
+from itk_napari_conversion import image_layer_from_image
 
 image_layer = image_layer_from_image(image)
 ```

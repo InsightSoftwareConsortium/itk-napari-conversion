@@ -8,6 +8,7 @@ author = "Matt McCormick"
 author-email = "matt.mccormick@kitware.com"
 home-page = "https://github.com/InsightSoftwareConsortium/itk-napari-conversion"
 classifiers = [ "License :: OSI Approved :: Apache Software License",]
+description-file="README.md"
 
 requires = [
     "itk-core >=5.2.0",

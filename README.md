@@ -18,14 +18,14 @@ Usage
 Convert an `itk.Image` to an `napari.layers.Image`:
 
 ```
-import itk_napari_conversion
+from itk_napari_conversion import image_from_layer
 
-image_layer = itk_napari_conversion.image_from_image_layer(image)
+image_layer = image_layer_from_image(image)
 ```
 
 Convert to an `napari.layers.Image` to an `itk.Image`:
 ```
-import itk_napari_conversion
+from itk_napari_conversion import image_from_image_layer
 
-image = itk_napari_conversion.image_layer_from_image(image_layer)
+image = image_from_image_layer(image_layer)
 ```

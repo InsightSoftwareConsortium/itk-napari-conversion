@@ -2,9 +2,7 @@
 
 __version__ = "0.2.0"
 
-__all__ = [
-    "image_layer_from_image",
-]
+__all__ = ["image_layer_from_image", "image_from_image_layer"]
 
 import napari
 import itk
@@ -12,6 +10,7 @@ import numpy as np
 
 
 def image_layer_from_image(image):
+    """Convert an itk.Image to a napari.layers.Image."""
     rgb = False
     if isinstance(image, itk.Image):
         PixelType = itk.template(image)[1][0]
@@ -30,3 +29,9 @@ def image_layer_from_image(image):
         data, rgb=rgb, metadata=metadata, scale=scale, translate=translate
     )
     return image_layer
+
+def image_from_image_layer(image_layer):
+    """Convert a napari.layers.Image to an itk.Image."""
+    image = itk.image_view_from_array(image_layer.data)
+
+    return image

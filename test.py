@@ -59,3 +59,10 @@ def test_image_layer_from_image_translate():
 # image_layer = itk_napari_conversion.image_layer_from_image(image)
 # assert np.array_equal(data, image_layer.data)
 # assert np.allclose(rotation, image_layer.rotate)
+
+
+def test_image_from_image_layer():
+    data = np.random.randint(256, size=(10, 10), dtype=np.uint8)
+    image_layer = napari.layers.Image(data)
+    image = itk_napari_conversion.image_from_image_layer(image_layer)
+    assert np.array_equal(data, itk.array_view_from_image(image))

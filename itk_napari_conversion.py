@@ -32,6 +32,14 @@ def image_layer_from_image(image):
 
 def image_from_image_layer(image_layer):
     """Convert a napari.layers.Image to an itk.Image."""
-    image = itk.image_view_from_array(image_layer.data)
+    if image_layer.rgb and image_layer.data.shape[-1] in (3, 4):
+        if image_layer.data.shape[-1] == 3:
+            PixelType = itk.RGBPixel[itk.UC]
+        else:
+            PixelType = itk.RGBAPixel[itk.UC]
+        image = itk.image_view_from_array(image_layer.data, PixelType)
+
+    else:
+        image = itk.image_view_from_array(image_layer.data)
 
     return image

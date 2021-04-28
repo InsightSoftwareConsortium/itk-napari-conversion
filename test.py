@@ -66,3 +66,10 @@ def test_image_from_image_layer():
     image_layer = napari.layers.Image(data)
     image = itk_napari_conversion.image_from_image_layer(image_layer)
     assert np.array_equal(data, itk.array_view_from_image(image))
+
+def test_image_from_image_layer_rgb():
+    data = np.random.randint(256, size=(10, 10, 3), dtype=np.uint8)
+    image_layer = napari.layers.Image(data, rgb=True)
+    image = itk_napari_conversion.image_from_image_layer(image_layer)
+    assert np.array_equal(data, itk.array_view_from_image(image))
+    assert itk.template(image)[1][0] is itk.RGBPixel[itk.UC]

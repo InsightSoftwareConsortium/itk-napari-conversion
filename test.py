@@ -73,3 +73,12 @@ def test_image_from_image_layer_rgb():
     image = itk_napari_conversion.image_from_image_layer(image_layer)
     assert np.array_equal(data, itk.array_view_from_image(image))
     assert itk.template(image)[1][0] is itk.RGBPixel[itk.UC]
+
+def test_image_from_image_layer_metadata():
+    data = np.random.randint(256, size=(10, 10, 3), dtype=np.uint8)
+    metadata = {"wookies": 7, "units": "mm" }
+    image_layer = napari.layers.Image(data, metadata=metadata)
+    image = itk_napari_conversion.image_from_image_layer(image_layer)
+    assert np.array_equal(data, itk.array_view_from_image(image))
+    assert image["wookies"] == 7
+    assert image["units"] == "mm"

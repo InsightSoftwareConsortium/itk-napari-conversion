@@ -42,4 +42,8 @@ def image_from_image_layer(image_layer):
     else:
         image = itk.image_view_from_array(image_layer.data)
 
+    if image_layer.metadata:
+        for k, v in image_layer.metadata.items():
+            image[k] = v
+
     return image

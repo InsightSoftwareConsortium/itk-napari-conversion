@@ -16,7 +16,9 @@ def image_layer_from_image(image):
             rgb = True
 
     metadata = dict(image)
+    scale = image['spacing']
 
     data = itk.array_view_from_image(image)
-    image_layer = napari.layers.Image(data, rgb=rgb, metadata=metadata)
+    image_layer = napari.layers.Image(data, rgb=rgb, metadata=metadata,
+            scale=scale)
     return image_layer

@@ -20,13 +20,12 @@ def image_layer_from_image(image):
     metadata = dict(image)
     scale = image["spacing"]
     translate = image["origin"]
-    # Todo: convert the rotation matrix to angles, in degrees
-    # rotate = image['direction']
-    # https://github.com/InsightSoftwareConsortium/itk-napari-conversion/issues/7
+    rotate = np.transpose(image['direction'])
 
     data = itk.array_view_from_image(image)
     image_layer = napari.layers.Image(
-        data, rgb=rgb, metadata=metadata, scale=scale, translate=translate
+        data, rgb=rgb, metadata=metadata,
+        scale=scale, translate=translate, rotate=rotate,
     )
     return image_layer
 
@@ -51,5 +50,8 @@ def image_from_image_layer(image_layer):
 
     if image_layer.translate is not None:
         image["origin"] = image_layer.translate.astype(np.float64)
+
+    if image_layer.rotate is not None:
+        image["direction"] = np.ascontiguousarray(np.transpose(image_layer.rotate)).astype(np.float64)
 
     return image

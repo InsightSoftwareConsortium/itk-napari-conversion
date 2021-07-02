@@ -2,6 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/itk_napari_conversion.svg)](https://pypi.python.org/pypi/itk_napari_conversion)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/InsightSoftwareConsortium/itk-napari-conversion/blob/master/LICENSE)
+[![tests](https://github.com/InsightSoftwareConsortium/itk-napari-conversion/actions/workflows/test_and_deploy.yml/badge.svg)](https://github.com/InsightSoftwareConsortium/itk-napari-conversion/actions/workflows/test_and_deploy.yml)
 
 Convert between [itk](https://itk.org) and [napari](https://napari.org) data structures.
 

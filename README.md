@@ -42,7 +42,7 @@ git clone https://github.com/InsightSoftwareConsortium/itk-napari-conversion.git
 cd itk-napari-conversation
 pip install flit pytest
 flit install --symlink
-pytest test.py
+pytest tests.py
 ```
 
 Follow the [itk contributing

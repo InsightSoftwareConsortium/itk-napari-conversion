@@ -1,12 +1,16 @@
 [build-system]
-requires = ["flit_core >=2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.flit.metadata]
-module = "itk_napari_conversion"
-author = "Matt McCormick"
-author-email = "matt.mccormick@kitware.com"
-home-page = "https://github.com/InsightSoftwareConsortium/itk-napari-conversion"
+[project]
+name = "itk_napari_conversion"
+dynamic = ["version"]
+requires-python = ">=3.10,<3.14"
+description = "Convert between itk and napari data structures"
+readme = "README.md"
+authors = [
+    { name = "Matt McCormick", email = "matt@fideus.io" },
+]
 classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python",
@@ -20,14 +24,29 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Software Development :: Libraries",
 ]
-description-file="README.md"
-
-requires = [
+dependencies = [
     "itk-core >=5.2.0",
     "napari",
 ]
 
-[tool.flit.metadata.requires-extra]
-test = [
-    "pytest",
-]
+[project.urls]
+Homepage = "https://github.com/InsightSoftwareConsortium/itk-napari-conversion"
+
+[tool.hatch.version]
+path = "itk_napari_conversion.py"
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "win-64", "osx-arm64"]
+
+[tool.pixi.pypi-dependencies]
+itk_napari_conversion = { path = ".", editable = true }
+
+[tool.pixi.tasks]
+test = "pytest tests.py"
+
+[tool.pixi.dependencies]
+pytest = ">=8.4.2,<9"
+
+[tool.pixi.environments]
+default = { solve-group = "default" }

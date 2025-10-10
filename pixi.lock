@@ -1139,7 +1139,7 @@ packages:
 - pypi: ./
   name: itk-napari-conversion
   version: 0.3.1
-  sha256: c277dfc4eda222f83f0f412872aa0b94416b53501ff3e63427f67b32fd4f1f15
+  sha256: da74ca649a033a08f0fc489e7988b86e4196f30c11bdd6ff16812716fceac6ea
   requires_dist:
   - itk-core>=5.2.0
   - napari

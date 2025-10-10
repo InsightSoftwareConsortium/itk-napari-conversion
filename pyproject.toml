@@ -35,6 +35,13 @@ Homepage = "https://github.com/InsightSoftwareConsortium/itk-napari-conversion"
 [tool.hatch.version]
 path = "itk_napari_conversion.py"
 
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:builtin type SwigPyObject has no __module__ attribute",
+    "ignore:builtin type SwigPyPacked has no __module__ attribute",
+    "ignore:builtin type swigvarlink has no __module__ attribute",
+]
+
 [tool.pixi.workspace]
 channels = ["conda-forge"]
 platforms = ["linux-64", "win-64", "osx-arm64"]

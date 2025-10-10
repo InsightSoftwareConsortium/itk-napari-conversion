@@ -28,6 +28,7 @@ dependencies = [
     "itk-core >=5.2.0",
     "napari",
 ]
+optional-dependencies = { test = ["pytest"] }
 
 [project.urls]
 Homepage = "https://github.com/InsightSoftwareConsortium/itk-napari-conversion"

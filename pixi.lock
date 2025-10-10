@@ -1139,10 +1139,11 @@ packages:
 - pypi: ./
   name: itk-napari-conversion
   version: 0.3.1
-  sha256: da74ca649a033a08f0fc489e7988b86e4196f30c11bdd6ff16812716fceac6ea
+  sha256: f9fe24cd24e1a80bde4b059789c9ee4993da0779a90d25c333ad2389c44b83d3
   requires_dist:
   - itk-core>=5.2.0
   - napari
+  - pytest ; extra == 'test'
   requires_python: '>=3.10,<3.14'
   editable: true
 - pypi: https://files.pythonhosted.org/packages/c0/5a/9cac0c82afec3d09ccd97c8b6502d48f165f9124db81b4bcb90b4af974ee/jedi-0.19.2-py2.py3-none-any.whl

@@ -1,1 +1,4 @@
 dist
+# pixi environments
+.pixi/*
+!.pixi/config.toml

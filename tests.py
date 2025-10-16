@@ -50,16 +50,28 @@ def test_image_layer_from_image_translate():
     assert np.allclose(np.array(origin)[::-1], image_layer.translate)
 
 
-# https://github.com/InsightSoftwareConsortium/itk-napari-conversion/issues/7
-# def test_image_layer_from_image_rotate():
-# data = np.random.randint(256, size=(10, 10), dtype=np.uint8)
-# image = itk.image_view_from_array(data)
-# rotate = np.rot90(np.eye(2))
-# image.SetDirection(rotate)
-# image_layer = itk_napari_conversion.image_layer_from_image(image)
-# assert np.array_equal(data, image_layer.data)
-# assert np.allclose(rotation, image_layer.rotate)
+def test_image_layer_from_image_rotate():
+    data = np.random.randint(256, size=(10, 10), dtype=np.uint8)
+    image = itk.image_view_from_array(data)
 
+    rotate = np.rot90(np.eye(2))
+    image.SetDirection(rotate)
+    image_layer = itk_napari_conversion.image_layer_from_image(image)
+    assert np.array_equal(data, image_layer.data)
+    assert np.allclose(rotate, image_layer.rotate * np.sign(image_layer.scale))
+
+    def check_angle(angle):
+        print('angle', angle)
+        angle = np.radians(angle)
+        rotate = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle),
+            np.cos(angle)]], dtype=np.float64)
+        image.SetDirection(rotate)
+        image_layer = itk_napari_conversion.image_layer_from_image(image)
+        assert np.array_equal(data, image_layer.data)
+        assert np.allclose(rotate, image_layer.rotate)
+
+    for angle in [0, 30, 45, 60, 90, 120, 150, 180]:
+        check_angle(angle)
 
 def test_image_from_image_layer():
     data = np.random.randint(256, size=(10, 10), dtype=np.uint8)
@@ -100,3 +112,24 @@ def test_image_from_image_layer_translate():
     image = itk_napari_conversion.image_from_image_layer(image_layer)
     assert np.array_equal(data, itk.array_view_from_image(image))
     assert np.allclose(translate, np.array(image["origin"]))
+
+def test_image_from_image_layer_rotate():
+    data = np.random.randint(256, size=(10, 10), dtype=np.uint8)
+    rotate = np.rot90(np.eye(2))
+    image_layer = napari.layers.Image(data, rotate=rotate)
+    image = itk_napari_conversion.image_from_image_layer(image_layer)
+    assert np.array_equal(data, itk.array_view_from_image(image))
+    assert np.allclose(rotate, np.array(image["direction"]))
+
+    def check_angle(angle):
+        print('angle', angle)
+        angle = np.radians(angle)
+        rotate = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle),
+            np.cos(angle)]], dtype=np.float64)
+        image_layer = napari.layers.Image(data, rotate=rotate)
+        image = itk_napari_conversion.image_from_image_layer(image_layer)
+        assert np.array_equal(data, itk.array_view_from_image(image))
+        assert np.allclose(rotate, np.transpose(np.array(image["direction"])))
+
+    for angle in [0, 30, 45, 60, 90, 120, 150, 180]:
+        check_angle(angle)

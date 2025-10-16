@@ -133,3 +133,108 @@ def test_image_from_image_layer_rotate():
 
     for angle in [0, 30, 45, 60, 90, 120, 150, 180]:
         check_angle(angle)
+
+
+def test_points_layer_from_point_set():
+    # Create a simple 3D point set
+    PointSetType = itk.PointSet[itk.F, 3]
+    point_set = PointSetType.New()
+
+    # Add some points
+    points_data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], dtype=np.float32)
+    points = itk.vector_container_from_array(points_data.flatten())
+    point_set.SetPoints(points)
+
+    # Convert to napari points layer
+    points_layer = itk_napari_conversion.points_layer_from_point_set(point_set)
+
+    # Check that data matches
+    assert np.allclose(points_data, points_layer.data)
+
+
+def test_points_layer_from_point_set_with_features():
+    # Create a 3D point set with point data
+    PointSetType = itk.PointSet[itk.F, 3]
+    point_set = PointSetType.New()
+
+    # Add points
+    points_data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], dtype=np.float32)
+    points = itk.vector_container_from_array(points_data.flatten())
+    point_set.SetPoints(points)
+
+    # Add point data (features)
+    feature_data = np.array([10.0, 20.0, 30.0], dtype=np.float32)
+    point_data = itk.vector_container_from_array(feature_data)
+    point_set.SetPointData(point_data)
+
+    # Convert to napari points layer
+    points_layer = itk_napari_conversion.points_layer_from_point_set(point_set)
+
+    # Check that data matches
+    assert np.allclose(points_data, points_layer.data)
+    assert points_layer.features is not None
+    assert 'feature' in points_layer.features
+    assert np.allclose(feature_data, points_layer.features['feature'])
+
+
+def test_point_set_from_points_layer():
+    # Create napari points layer
+    data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
+    points_layer = napari.layers.Points(data)
+
+    # Convert to ITK point set
+    point_set = itk_napari_conversion.point_set_from_points_layer(points_layer)
+
+    # Check points
+    points_array = itk.array_from_vector_container(point_set.GetPoints())
+    assert np.allclose(data, points_array)
+
+
+def test_point_set_from_points_layer_with_features():
+    # Create napari points layer with features
+    data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
+    features = {'feature': np.array([10.0, 20.0, 30.0])}
+    points_layer = napari.layers.Points(data, features=features)
+
+    # Convert to ITK point set
+    point_set = itk_napari_conversion.point_set_from_points_layer(points_layer)
+
+    # Check points
+    points_array = itk.array_from_vector_container(point_set.GetPoints())
+    assert np.allclose(data, points_array)
+
+    # Check point data - verify it was set
+    point_data = point_set.GetPointData()
+    assert point_data.Size() > 0, "Point data should be set"
+    point_data_array = itk.array_from_vector_container(point_data)
+    assert np.allclose(features['feature'], point_data_array)
+
+
+def test_point_set_from_points_layer_with_scale():
+    # Create napari points layer with scale
+    data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    scale = np.array([2.0, 3.0, 4.0])
+    points_layer = napari.layers.Points(data, scale=scale)
+
+    # Convert to ITK point set
+    point_set = itk_napari_conversion.point_set_from_points_layer(points_layer)
+
+    # Check that points are scaled
+    points_array = itk.array_from_vector_container(point_set.GetPoints())
+    expected = data * scale
+    assert np.allclose(expected, points_array)
+
+
+def test_point_set_from_points_layer_with_translate():
+    # Create napari points layer with translation
+    data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    translate = np.array([10.0, 20.0, 30.0])
+    points_layer = napari.layers.Points(data, translate=translate)
+
+    # Convert to ITK point set
+    point_set = itk_napari_conversion.point_set_from_points_layer(points_layer)
+
+    # Check that points are translated
+    points_array = itk.array_from_vector_container(point_set.GetPoints())
+    expected = data + translate
+    assert np.allclose(expected, points_array)

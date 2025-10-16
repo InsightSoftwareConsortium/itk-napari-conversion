@@ -2,7 +2,12 @@
 
 __version__ = "0.4.0"
 
-__all__ = ["image_layer_from_image", "image_from_image_layer"]
+__all__ = [
+    "image_layer_from_image",
+    "image_from_image_layer",
+    "points_layer_from_point_set",
+    "point_set_from_points_layer",
+]
 
 import napari
 import itk
@@ -55,3 +60,86 @@ def image_from_image_layer(image_layer):
         image["direction"] = np.ascontiguousarray(np.transpose(image_layer.rotate)).astype(np.float64)
 
     return image
+
+
+def points_layer_from_point_set(point_set):
+    """Convert an itk.PointSet to a napari.layers.Points."""
+    # Get points as numpy array
+    number_of_points = point_set.GetNumberOfPoints()
+
+    if number_of_points == 0:
+        data = np.array([]).reshape(0, 3)  # Default to 3D empty array
+    else:
+        points_array = itk.array_from_vector_container(point_set.GetPoints())
+        data = points_array
+
+    # Get point data (features) if available
+    point_data = point_set.GetPointData()
+    features = None
+    if point_data.Size() > 0:
+        point_data_array = itk.array_from_vector_container(point_data)
+        # Use first component as feature if it's a scalar
+        if point_data_array.ndim == 1:
+            features = {'feature': point_data_array}
+        else:
+            # If multi-component, use first component
+            features = {'feature': point_data_array[:, 0] if point_data_array.shape[1] > 0 else point_data_array[:, 0:1].flatten()}
+
+    points_layer = napari.layers.Points(
+        data,
+        features=features,
+    )
+    return points_layer
+
+
+def point_set_from_points_layer(points_layer):
+    """Convert a napari.layers.Points to an itk.PointSet."""
+    # Apply transformations (affine, scale, translate) to points
+    data = points_layer.data.copy()  # Make a copy to avoid modifying original
+
+    # Napari always has an affine that includes scale and translate
+    # We need to apply it to get world coordinates
+    # Apply scale and translate
+    if points_layer.scale is not None:
+        data = data * points_layer.scale
+    if points_layer.translate is not None:
+        data = data + points_layer.translate
+
+    # Determine dimension from data
+    if len(data) == 0:
+        dimension = 3  # Default to 3D
+    else:
+        dimension = data.shape[1]
+
+    # Create ITK PointSet
+    # Use float pixel type for point data by default
+    PointSetType = itk.PointSet[itk.F, dimension]
+    point_set = PointSetType.New()
+
+    # Set points
+    if len(data) > 0:
+        points = itk.vector_container_from_array(data.astype(np.float32).flatten())
+        point_set.SetPoints(points)
+
+    # Set point data from features if available
+    if points_layer.features is not None and len(points_layer.features) > 0:
+        feature_keys = list(points_layer.features.keys())
+        if len(feature_keys) > 0:
+            # Use the first feature column as point data
+            feature_name = feature_keys[0]
+
+            # Handle both dict and DataFrame
+            if hasattr(points_layer.features, 'iloc'):
+                # It's a pandas DataFrame
+                feature_data = points_layer.features[feature_name].values
+            else:
+                # It's a dict
+                feature_data = points_layer.features[feature_name]
+
+            if isinstance(feature_data, (list, np.ndarray)):
+                feature_array = np.array(feature_data).astype(np.float32)
+                if len(feature_array) > 0:
+                    point_data = itk.vector_container_from_array(feature_array)
+                    point_set.SetPointData(point_data)
+
+    return point_set

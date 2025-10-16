@@ -6,32 +6,214 @@
 
 Convert between [itk](https://itk.org) and [napari](https://napari.org) data structures.
 
-Installation
-------------
+## Installation
 
-```
+```sh
 pip install itk-napari-conversion
 ```
 
-Usage
------
+## Usage
 
-Convert an `itk.Image` to an `napari.layers.Image`:
+### Image Conversion
 
-```
+#### Convert ITK Image to napari Image Layer
+
+Convert an `itk.Image` to a `napari.layers.Image`:
+
+```python
 from itk_napari_conversion import image_layer_from_image
 
 image_layer = image_layer_from_image(image)
 ```
 
-Convert to an `napari.layers.Image` to an `itk.Image`:
+**Features:**
+- Automatically detects and handles RGB/RGBA images
+- Preserves image metadata (spacing, origin, direction, custom metadata)
+- Converts ITK's physical space information to napari's layer transformations:
+  - `spacing` → `scale`
+  - `origin` → `translate`
+  - `direction` → `rotate`
+
+**Example:**
+```python
+import itk
+import napari
+from itk_napari_conversion import image_layer_from_image
+
+# Read an image
+image = itk.imread('path/to/image.nrrd')
+
+# Add custom metadata
+image['units'] = 'mm'
+image['patient_id'] = '12345'
+
+# Convert to napari layer
+image_layer = image_layer_from_image(image)
+
+# The layer will have:
+# - image_layer.scale = image spacing (in reverse order for NumPy)
+# - image_layer.translate = image origin
+# - image_layer.rotate = image direction matrix
+# - image_layer.metadata = all custom metadata
 ```
+
+#### Convert napari Image Layer to ITK Image
+
+Convert a `napari.layers.Image` to an `itk.Image`:
+
+```python
 from itk_napari_conversion import image_from_image_layer
 
 image = image_from_image_layer(image_layer)
 ```
 
-Hacking
+**Features:**
+- Automatically handles RGB/RGBA layers
+- Converts napari layer transformations back to ITK physical space:
+  - `scale` → `spacing`
+  - `translate` → `origin`
+  - `rotate` → `direction`
+- Preserves all metadata from the layer
+
+**Example:**
+```python
+import numpy as np
+import napari
+from itk_napari_conversion import image_from_image_layer
+
+# Create a napari image layer with transformations
+viewer = napari.Viewer()
+data = np.random.rand(100, 100, 100)
+layer = viewer.add_image(
+    data,
+    scale=[2.0, 1.5, 1.5],  # anisotropic spacing
+    translate=[10.0, 20.0, 30.0],
+    metadata={'description': 'My volume'}
+)
+
+# Convert to ITK
+image = image_from_image_layer(layer)
+
+# The ITK image will have:
+# - spacing in ITK order (reversed from napari)
+# - origin set from translate
+# - direction matrix from rotate
+# - metadata dictionary with custom fields
+```
+
+### Point Set Conversion
+
+#### Convert ITK PointSet to napari Points Layer
+
+Convert an `itk.PointSet` to a `napari.layers.Points`:
+
+```python
+from itk_napari_conversion import points_layer_from_point_set
+
+points_layer = points_layer_from_point_set(point_set)
+```
+
+**Features:**
+- Extracts point coordinates from ITK PointSet using `itk.array_from_vector_container()`
+- Converts point data (if present) to napari features dictionary
+  - Uses the first component as the 'feature' key
+- Returns a `napari.layers.Points` object
+
+**Example:**
+```python
+import itk
+import numpy as np
+from itk_napari_conversion import points_layer_from_point_set
+
+# Create ITK PointSet
+PointSetType = itk.PointSet[itk.F, 3]
+point_set = PointSetType.New()
+
+# Add points
+points_data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=np.float32)
+points = itk.vector_container_from_array(points_data.flatten())
+point_set.SetPoints(points)
+
+# Add point data (features)
+feature_data = np.array([10.0, 20.0], dtype=np.float32)
+point_data = itk.vector_container_from_array(feature_data)
+point_set.SetPointData(point_data)
+
+# Convert to napari
+points_layer = points_layer_from_point_set(point_set)
+# points_layer.features['feature'] will contain [10.0, 20.0]
+```
+
+#### Convert napari Points Layer to ITK PointSet
+
+Convert a `napari.layers.Points` to an `itk.PointSet`:
+
+```python
+from itk_napari_conversion import point_set_from_points_layer
+
+point_set = point_set_from_points_layer(points_layer)
+```
+
+**Features:**
+- Applies napari transformations (scale, translate) to point coordinates before conversion
+- Extracts points from napari layer data
+- Converts the first feature column (if present) to ITK point data
+- Returns an `itk.PointSet` object with dimension determined from the data
+
+**Example:**
+```python
+import napari
+import numpy as np
+from itk_napari_conversion import point_set_from_points_layer
+
+# Create napari Points layer with transformations
+data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+features = {'intensity': np.array([10.0, 20.0])}
+scale = np.array([2.0, 2.0, 2.0])
+translate = np.array([100.0, 200.0, 300.0])
+
+points_layer = napari.layers.Points(
+    data,
+    features=features,
+    scale=scale,
+    translate=translate
+)
+
+# Convert to ITK PointSet
+point_set = point_set_from_points_layer(points_layer)
+
+# The points in the ITK PointSet will be in world coordinates:
+# (data * scale) + translate
+# = [[102.0, 204.0, 306.0], [108.0, 212.0, 312.0]]
+# Point data will be stored from the 'intensity' feature
+```
+
+### Transformation Handling
+
+#### Images
+- **ITK → napari**: Physical space metadata (spacing, origin, direction) is converted to napari layer transformations
+- **napari → ITK**: Layer transformations are converted back to ITK physical space metadata
+
+#### Points
+- **ITK → napari**: Points are copied as-is without transformations (identity transform assumed)
+- **napari → ITK**: Layer transformations (scale, translate) are **applied to points** to convert them to world coordinates
+
+### Notes
+
+**Images:**
+- Supports 2D, 3D, and multi-dimensional images
+- RGB and RGBA images are automatically detected and handled
+- Axis order is automatically reversed between ITK (x, y, z) and NumPy/napari (z, y, x)
+- Metadata is preserved bidirectionally
+
+**Points:**
+- Point data in ITK is stored as float32
+- Only the first feature column from napari is used for ITK point data
+- Empty point sets are handled gracefully
+- Dimension is automatically determined from the point data shape
+- Metadata conversion is not currently supported for point sets
+
+## Hacking
 -------
 
 Contributions are welcome!

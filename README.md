@@ -155,7 +155,7 @@ point_set = point_set_from_points_layer(points_layer)
 ```
 
 **Features:**
-- Applies napari transformations (scale, translate) to point coordinates before conversion
+- Applies napari transformations (scale, rotate, translate) to point coordinates before conversion
 - Extracts points from napari layer data
 - Converts the first feature column (if present) to ITK point data
 - Returns an `itk.PointSet` object with dimension determined from the data
@@ -172,10 +172,19 @@ features = {'intensity': np.array([10.0, 20.0])}
 scale = np.array([2.0, 2.0, 2.0])
 translate = np.array([100.0, 200.0, 300.0])
 
+# Optional: add rotation (90 degrees around z-axis)
+angle = np.radians(90)
+rotate = np.array([
+    [np.cos(angle), -np.sin(angle), 0],
+    [np.sin(angle), np.cos(angle), 0],
+    [0, 0, 1]
+])
+
 points_layer = napari.layers.Points(
     data,
     features=features,
     scale=scale,
+    rotate=rotate,
     translate=translate
 )
 
@@ -183,8 +192,7 @@ points_layer = napari.layers.Points(
 point_set = point_set_from_points_layer(points_layer)
 
 # The points in the ITK PointSet will be in world coordinates:
-# (data * scale) + translate
-# = [[102.0, 204.0, 306.0], [108.0, 212.0, 312.0]]
+# ((data * scale) @ rotate.T) + translate
 # Point data will be stored from the 'intensity' feature
 ```
 
@@ -196,7 +204,8 @@ point_set = point_set_from_points_layer(points_layer)
 
 #### Points
 - **ITK → napari**: Points are copied as-is without transformations (identity transform assumed)
-- **napari → ITK**: Layer transformations (scale, translate) are **applied to points** to convert them to world coordinates
+- **napari → ITK**: Layer transformations (scale, rotate, translate) are **applied to points** to convert them to world coordinates
+  - Transformations are applied in order: scale → rotate → translate
 
 ### Notes
 

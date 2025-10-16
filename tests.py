@@ -238,3 +238,27 @@ def test_point_set_from_points_layer_with_translate():
     points_array = itk.array_from_vector_container(point_set.GetPoints())
     expected = data + translate
     assert np.allclose(expected, points_array)
+
+
+def test_point_set_from_points_layer_with_rotate():
+    # Create napari points layer with rotation
+    data = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+
+    # 90 degree rotation around z-axis
+    angle = np.radians(90)
+    rotate = np.array([
+        [np.cos(angle), -np.sin(angle), 0],
+        [np.sin(angle), np.cos(angle), 0],
+        [0, 0, 1]
+    ], dtype=np.float64)
+
+    points_layer = napari.layers.Points(data, rotate=rotate)
+
+    # Convert to ITK point set
+    point_set = itk_napari_conversion.point_set_from_points_layer(points_layer)
+
+    # Check that points are rotated
+    points_array = itk.array_from_vector_container(point_set.GetPoints())
+    expected = data @ rotate.T
+    assert np.allclose(expected, points_array, atol=1e-10)
+

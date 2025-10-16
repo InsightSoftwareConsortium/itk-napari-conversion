@@ -94,14 +94,18 @@ def points_layer_from_point_set(point_set):
 
 def point_set_from_points_layer(points_layer):
     """Convert a napari.layers.Points to an itk.PointSet."""
-    # Apply transformations (affine, scale, translate) to points
+    # Apply transformations (rotate, scale, translate) to points
     data = points_layer.data.copy()  # Make a copy to avoid modifying original
 
     # Napari always has an affine that includes scale and translate
     # We need to apply it to get world coordinates
-    # Apply scale and translate
+    # Apply transformations in order: scale, rotate, translate
     if points_layer.scale is not None:
         data = data * points_layer.scale
+    if points_layer.rotate is not None:
+        # Apply rotation matrix to each point
+        rotate_matrix = np.asarray(points_layer.rotate)
+        data = data @ rotate_matrix.T
     if points_layer.translate is not None:
         data = data + points_layer.translate
 

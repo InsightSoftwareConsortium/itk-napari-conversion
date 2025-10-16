@@ -52,8 +52,8 @@ image_layer = image_layer_from_image(image)
 
 # The layer will have:
 # - image_layer.scale = image spacing (in reverse order for NumPy)
-# - image_layer.translate = image origin
-# - image_layer.rotate = image direction matrix
+# - image_layer.translate = image origin (in reverse order for NumPy)
+# - image_layer.rotate = image direction matrix (in reverse order for NumPy)
 # - image_layer.metadata = all custom metadata
 ```
 
@@ -95,9 +95,9 @@ layer = viewer.add_image(
 image = image_from_image_layer(layer)
 
 # The ITK image will have:
-# - spacing in ITK order (reversed from napari)
-# - origin set from translate
-# - direction matrix from rotate
+# - spacing: coordinates in ITK order, so reversed from napari `scale`: [1.5, 1.5, 2.0]
+# - origin: coordinates in ITK order, so reversed from napari `translate`: [30.0, 20.0, 10.0]
+# - direction: from napari `rotate`. In this case unspecified, so just the identity matrix.
 # - metadata dictionary with custom fields
 ```
 

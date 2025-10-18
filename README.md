@@ -84,9 +84,19 @@ from itk_napari_conversion import image_from_image_layer
 # Create a napari image layer with transformations
 viewer = napari.Viewer()
 data = np.random.rand(100, 100, 100)
+
+# 45 degree rotation around z-axis
+angle = np.radians(45)
+rotate = np.array([
+    [np.cos(angle), -np.sin(angle), 0],
+    [np.sin(angle), np.cos(angle), 0],
+    [0, 0, 1]
+], dtype=np.float64)
+
 layer = viewer.add_image(
     data,
     scale=[2.0, 1.5, 1.5],  # anisotropic spacing
+    rotate=rotate,
     translate=[10.0, 20.0, 30.0],
     metadata={'description': 'My volume'}
 )
@@ -97,8 +107,26 @@ image = image_from_image_layer(layer)
 # The ITK image will have:
 # - spacing: coordinates in ITK order, so reversed from napari `scale`: [1.5, 1.5, 2.0]
 # - origin: coordinates in ITK order, so reversed from napari `translate`: [30.0, 20.0, 10.0]
-# - direction: from napari `rotate`. In this case unspecified, so just the identity matrix.
-# - metadata dictionary with custom fields
+# The ITK image will have:
+# - spacing: coordinates in ITK order, so reversed from napari `scale`: [1.5, 1.5, 2.0]
+# - origin: coordinates in ITK order, so reversed from napari `translate`: [30.0, 20.0, 10.0]
+# - direction: transpose of napari `rotate` matrix
+
+# Access the direction matrix via dictionary access (recommended):
+direction = image["direction"]
+print(direction)
+# [[0.70710678 0.70710678 0.        ]
+#  [-0.70710678 0.70710678 0.        ]
+#  [0.         0.         1.        ]]
+
+# This is the transpose of napari's rotate matrix:
+#   [[cos(45°), sin(45°), 0],
+#    [-sin(45°), cos(45°), 0],
+#    [0, 0, 1]]
+
+# Note: image.GetDirection() may return a different matrix because it accesses
+# the underlying ITK image metadata differently. Use dictionary access for
+# consistency with how the direction was set.
 ```
 
 ### Point Set Conversion

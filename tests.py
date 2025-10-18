@@ -135,6 +135,41 @@ def test_image_from_image_layer_rotate():
         check_angle(angle)
 
 
+def test_image_from_image_layer_rotate_3d():
+    """Test 3D rotation matrix conversion from napari to ITK."""
+    data = np.random.randint(256, size=(10, 10, 10), dtype=np.uint8)
+
+    # 45 degree rotation around z-axis
+    angle = np.radians(45)
+    rotate = np.array([
+        [np.cos(angle), -np.sin(angle), 0],
+        [np.sin(angle), np.cos(angle), 0],
+        [0, 0, 1]
+    ], dtype=np.float64)
+
+    scale = [2.0, 1.5, 1.5]
+    translate = [10.0, 20.0, 30.0]
+
+    image_layer = napari.layers.Image(data, scale=scale, rotate=rotate, translate=translate)
+    image = itk_napari_conversion.image_from_image_layer(image_layer)
+
+    assert np.array_equal(data, itk.array_view_from_image(image))
+
+    # napari rotate is transposed compared to ITK direction
+    assert np.allclose(rotate, np.transpose(np.array(image["direction"])))
+
+    # Verify we can access direction via dictionary
+    direction_array = image["direction"]  # Returns numpy array
+    assert direction_array.shape == (3, 3)
+
+    # Verify the actual values in the direction matrix (transpose of rotate)
+    expected_direction = np.transpose(rotate)
+    assert np.allclose(direction_array, expected_direction)
+
+    # Verify other transformations
+    assert np.allclose(scale, np.array(image["spacing"]))
+    assert np.allclose(translate, np.array(image["origin"]))
+
 def test_points_layer_from_point_set():
     # Create a simple 3D point set
     PointSetType = itk.PointSet[itk.F, 3]

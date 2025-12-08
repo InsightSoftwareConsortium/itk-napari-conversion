@@ -62,8 +62,22 @@ def image_from_image_layer(image_layer):
     return image
 
 
-def points_layer_from_point_set(point_set):
-    """Convert an itk.PointSet to a napari.layers.Points."""
+def points_layer_from_point_set(point_set, reverse_coords=True):
+    """Convert an itk.PointSet to a napari.layers.Points.
+
+    Parameters
+    ----------
+    point_set : itk.PointSet
+        The ITK PointSet to convert.
+    reverse_coords : bool, optional
+        If True (default), reverse the coordinate order from ITK's x,y,z
+        to napari's z,y,x order.
+
+    Returns
+    -------
+    napari.layers.Points
+        The converted napari Points layer.
+    """
     # Get points as numpy array
     number_of_points = point_set.GetNumberOfPoints()
 
@@ -71,7 +85,11 @@ def points_layer_from_point_set(point_set):
         data = np.array([]).reshape(0, 3)  # Default to 3D empty array
     else:
         points_array = itk.array_from_vector_container(point_set.GetPoints())
-        data = points_array
+        if reverse_coords:
+            # Reverse coordinate order from ITK (x,y,z) to napari (z,y,x)
+            data = points_array[:, ::-1]
+        else:
+            data = points_array
 
     # Get point data (features) if available
     point_data = point_set.GetPointData()
@@ -92,8 +110,22 @@ def points_layer_from_point_set(point_set):
     return points_layer
 
 
-def point_set_from_points_layer(points_layer):
-    """Convert a napari.layers.Points to an itk.PointSet."""
+def point_set_from_points_layer(points_layer, reverse_coords=True):
+    """Convert a napari.layers.Points to an itk.PointSet.
+
+    Parameters
+    ----------
+    points_layer : napari.layers.Points
+        The napari Points layer to convert.
+    reverse_coords : bool, optional
+        If True (default), reverse the coordinate order from napari's z,y,x
+        to ITK's x,y,z order.
+
+    Returns
+    -------
+    itk.PointSet
+        The converted ITK PointSet.
+    """
     # Apply transformations (rotate, scale, translate) to points
     data = points_layer.data.copy()  # Make a copy to avoid modifying original
 
@@ -122,6 +154,9 @@ def point_set_from_points_layer(points_layer):
 
     # Set points
     if len(data) > 0:
+        if reverse_coords:
+            # Reverse coordinate order from napari (z,y,x) to ITK (x,y,z)
+            data = data[:, ::-1]
         points = itk.vector_container_from_array(data.astype(np.float32).flatten())
         point_set.SetPoints(points)
 

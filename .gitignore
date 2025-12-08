@@ -2,3 +2,8 @@ dist
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
